@@ -57,11 +57,11 @@ int currentShoulder = 90;
 int currentElbow = 90;
 int currentGripper = 90;
 
-// Target servo positions (from serial)
-int targetBase = 90;
-int targetShoulder = 90;
-int targetElbow = 90;
-int targetGripper = 90;
+// Target servo positions (from serial) - volatile for safe concurrent access
+volatile int targetBase = 90;
+volatile int targetShoulder = 90;
+volatile int targetElbow = 90;
+volatile int targetGripper = 90;
 
 // Serial parsing
 char serialBuffer[BUFFER_SIZE];

@@ -11,11 +11,13 @@ import serial
 import time
 import threading
 from collections import deque
-from queue import Queue
+from queue import Queue, Full
 import math
+import argparse
+import os
 
 # ============== CONFIGURATION ==============
-SERIAL_PORT = 'COM3'  # Change to your Arduino/ESP32 port (e.g., '/dev/ttyUSB0' on Linux)
+SERIAL_PORT = os.environ.get('ROBOT_SERIAL_PORT', 'COM3')  # Configurable via environment variable
 BAUD_RATE = 115200    # High baud rate for low latency
 CAMERA_INDEX = 0
 
@@ -269,7 +271,7 @@ def send_servo_command(base, shoulder, elbow, gripper):
     command = f"<{int(base)},{int(shoulder)},{int(elbow)},{int(gripper)}>\n"
     try:
         command_queue.put_nowait(command)
-    except:
+    except Full:
         pass  # Queue full, skip this command
 
 # ============== MAIN PROCESSING ==============
@@ -355,14 +357,24 @@ def process_frame(frame):
 
 def main():
     """Main function"""
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(description='Eye-Tracking Robot Arm Controller')
+    parser.add_argument('--port', type=str, default=SERIAL_PORT,
+                       help='Serial port for Arduino (default: COM3 or ROBOT_SERIAL_PORT env var)')
+    parser.add_argument('--baud', type=int, default=BAUD_RATE,
+                       help='Baud rate (default: 115200)')
+    parser.add_argument('--camera', type=int, default=CAMERA_INDEX,
+                       help='Camera index (default: 0)')
+    args = parser.parse_args()
+    
     # Start serial communication thread
     serial_thread = threading.Thread(target=serial_sender_thread, 
-                                    args=(SERIAL_PORT, BAUD_RATE), 
+                                    args=(args.port, args.baud), 
                                     daemon=True)
     serial_thread.start()
     
     # Open camera
-    cap = cv2.VideoCapture(CAMERA_INDEX)
+    cap = cv2.VideoCapture(args.camera)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
     cap.set(cv2.CAP_PROP_FPS, 30)
