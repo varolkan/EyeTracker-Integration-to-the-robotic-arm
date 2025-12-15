@@ -82,14 +82,25 @@ pip install -r requirements_robot.txt
 
 ### 3. Configuration
 
-**Update Serial Port in Python:**
+**Configure Serial Port:**
 
-Edit `robot_arm_controller.py`:
-```python
-SERIAL_PORT = 'COM3'  # Windows
-# SERIAL_PORT = '/dev/ttyUSB0'  # Linux
-# SERIAL_PORT = '/dev/cu.usbserial-0001'  # Mac
+Option 1: Command line argument (recommended)
+```bash
+python robot_arm_controller.py --port COM3  # Windows
+python robot_arm_controller.py --port /dev/ttyUSB0  # Linux
+python robot_arm_controller.py --port /dev/cu.usbserial-0001  # Mac
 ```
+
+Option 2: Environment variable
+```bash
+# Windows
+set ROBOT_SERIAL_PORT=COM3
+
+# Linux/Mac
+export ROBOT_SERIAL_PORT=/dev/ttyUSB0
+```
+
+Option 3: Edit default in `robot_arm_controller.py` (line 18)
 
 **Adjust Sensitivity (Optional):**
 ```python
@@ -108,7 +119,17 @@ ELBOW_MIN, ELBOW_MAX = 0, 180
 ### 4. Run the System
 
 ```bash
+# Basic usage (uses default COM3 or ROBOT_SERIAL_PORT)
 python robot_arm_controller.py
+
+# With custom serial port
+python robot_arm_controller.py --port /dev/ttyUSB0
+
+# With custom camera
+python robot_arm_controller.py --camera 1
+
+# All options
+python robot_arm_controller.py --port COM3 --baud 115200 --camera 0
 ```
 
 **Controls:**
